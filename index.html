@@ -474,15 +474,35 @@ function submitGame(){
     let val=parseInt(box.innerText);
   
     if(answer.has(val) && userSet.has(val)){
-      // ✅ correctly selected
-      box.classList.add("correct");
+    box.classList.add("correct");
   
+    let display = "";
+  
+    if(mode.value === "square"){
+      let root = Math.sqrt(val);
+      if(Number.isInteger(root)){
+        display = root;
+      }
+    }
+  
+    else if(mode.value === "cube"){
+      let root = Math.cbrt(val);
+      if(Number.isInteger(root)){
+        display = root;
+      }
+    }
+  
+    else if(mode.value === "consecutive"){
       let base = getConsecutiveBase(val);
       if(base){
-        box.innerHTML = `${val}<div class="small">${base} × ${base+1}</div>`;
+        display = `${base} × ${base+1}`;
       }
+    }
   
-    } else if(!answer.has(val) && userSet.has(val)){
+    if(display){
+      box.innerHTML = `${val}<div class="small">${display}</div>`;
+    }
+  } else if(!answer.has(val) && userSet.has(val)){
       // ❌ wrong selection
       box.classList.add("wrong");
   
