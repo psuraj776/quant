@@ -2,6 +2,8 @@
 <html>
 <head>
   <title>Quant Trainer PRO</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000000">
   <style>
     body { 
       font-family: Arial; 
@@ -474,6 +476,13 @@ if(!gameMode.checked && !patternMode.checked){
 }
 
 toggleGameMode();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(() => console.log("Service Worker Registered"));
+  });
+}
 
 </script>
 
