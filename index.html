@@ -182,12 +182,17 @@ function startTimer(){
     if(timeLeft<=0){
       clearInterval(timerInterval);
       timedOut = true;
-
-      result.style.opacity = 0;
-      result.innerText = `⏱ Time up! Correct: ${answer}`;
-      setTimeout(()=> result.style.opacity = 1, 50);
-
-      evaluated = true;   // ✅ FIX: prevents freeze
+    
+      if(gameMode.checked){
+        submitGame();   // ✅ auto-evaluate
+        result.innerText = "⏱ Time up! Check highlights";
+      } else {
+        result.style.opacity = 0;
+        result.innerText = `⏱ Time up! Correct: ${answer}`;
+        setTimeout(()=> result.style.opacity = 1, 50);
+      }
+    
+      evaluated = true;
     }
   },1000);
 }
@@ -296,9 +301,10 @@ function generateQuestion(){
   result.innerText="";
 
   if(gameMode.checked){
-    clearInterval(timerInterval);
-    document.getElementById("timer").innerText="";
     generateGame();
+  
+    startTimer();   // ✅ ADD THIS
+  
     keypad.style.display="none";
     kbToggle.style.display="none";
     return;
@@ -360,7 +366,9 @@ function generateQuestion(){
   }
 
   answerInput.value="";
-  startTimer();
+  if(!gameMode.checked){
+    startTimer();
+  }
 }
 
 // -------- GAME MODE --------
@@ -381,7 +389,8 @@ function generateGame(){
 
   if(m==="square"){
     title="Select PERFECT SQUARES";
-    while(correctSet.size<3){
+    let required = rand(3,5);
+    while(correctSet.size < required){
       let n=rand(5,20);
       correctSet.add(n*n);
     }
@@ -389,7 +398,8 @@ function generateGame(){
 
   else if(m==="cube"){
     title="Select PERFECT CUBES";
-    while(correctSet.size<3){
+    let required = rand(3,5);
+    while(correctSet.size < required){
       let n=rand(3,10);
       correctSet.add(n*n*n);
     }
@@ -397,7 +407,8 @@ function generateGame(){
 
   else if(m==="consecutive"){
     title="Select n × (n+1)";
-    while(correctSet.size<3){
+    let required = rand(3,5);
+    while(correctSet.size < required){
       let n=rand(3,15);
       correctSet.add(n*(n+1));
     }
@@ -409,7 +420,9 @@ function generateGame(){
 
   while(numbers.length<12){
     let r=rand(10,300);
-    if(!correctSet.has(r)) numbers.push(r);
+    if(!correctSet.has(r) && !numbers.includes(r)){
+      numbers.push(r);
+    }
   }
 
   numbers.sort(()=>Math.random()-0.5);
@@ -466,6 +479,16 @@ function submitGame(){
   });
 
   evaluated=true;
+
+  const isCorrect =
+    userSet.size === answer.size &&
+    [...answer].every(v => userSet.has(v));
+  
+  if(isCorrect){
+    result.innerText = "✅ Correct";
+  } else {
+    result.innerText = "❌ Try again";
+  }
 }
 
 // -------- SUBMIT --------
