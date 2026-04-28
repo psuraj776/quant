@@ -445,18 +445,22 @@ function submitGame(){
 
   boxes.forEach(box=>{
     let val=parseInt(box.innerText);
-
-    if(answer.has(val)){
+  
+    if(answer.has(val) && userSet.has(val)){
+      // ✅ correctly selected
       box.classList.add("correct");
-
+  
       let base = getConsecutiveBase(val);
       if(base){
         box.innerHTML = `${val}<div class="small">${base} × ${base+1}</div>`;
       }
-
-    } else if(userSet.has(val)){
+  
+    } else if(!answer.has(val) && userSet.has(val)){
+      // ❌ wrong selection
       box.classList.add("wrong");
-    } else if(answer.has(val)){
+  
+    } else if(answer.has(val) && !userSet.has(val)){
+      // ⚠️ missed correct
       box.classList.add("missed");
     }
   });
