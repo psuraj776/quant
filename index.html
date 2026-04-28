@@ -51,16 +51,22 @@
     .small { 
       font-size: 14px; 
     } 
-    .key { 
-      display: inline-block; 
-      padding: 10px 14px; 
-      margin: 5px; 
-      border: 2px solid #333; 
-      border-radius: 6px; 
-      cursor: pointer; 
-      font-size: 18px; 
-      min-width: 40px; 
-      background: #f5f5f5; 
+    #keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      max-width: 240px;
+      margin: 15px auto;
+    }
+    
+    .key {
+      padding: 14px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      background: #f5f5f5;
+      text-align: center;
     }
   </style>
 </head>
@@ -114,7 +120,7 @@
 
 <button id="kbToggle" onclick="toggleKeyboard()">Enable Device Keyboard</button>
 
-<div id="keypad" style="display:none; margin-top:15px;"></div>
+<div id="keypad"></div>
 
 <br>
 
@@ -199,7 +205,14 @@ function toggleKeyboard(){
 
 // -------- KEYPAD --------
 function renderKeypad(){
-  let keys=["1","2","3","4","5","6","7","8","9","0",".","*","/","%","←","C"];
+  let keys=[
+    "1","2","3",
+    "4","5","6",
+    "7","8","9",
+    ".","0","%",
+    "*","/","←",
+    "C"
+  ];
   let kp=document.getElementById("keypad");
   kp.innerHTML="";
 
@@ -262,7 +275,7 @@ function generateQuestion(){
 
   gameArea.style.display="none";
   answerInput.style.display="inline-block";
-  keypad.style.display="block";
+  keypad.style.display="grid";
   kbToggle.style.display="inline-block";
 
   renderKeypad();
@@ -323,7 +336,7 @@ function generateQuestion(){
 function generateGame(){
   gameArea.style.display="block";
   answerInput.style.display="none";
-  keypad.style.display="none";
+  keypad.style.display="grid";
   kbToggle.style.display="none";
 
   result.innerText="";
