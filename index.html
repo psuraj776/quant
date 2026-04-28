@@ -4,6 +4,7 @@
   <title>Quant Trainer PRO</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#000000">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <style>
     body { 
       font-family: Arial; 
@@ -55,18 +56,23 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      max-width: 240px;
-      margin: 15px auto;
+      max-width: 260px;
+      margin: 20px auto;
     }
     
     .key {
-      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 55px;
+      font-size: 20px;
       border: 2px solid #333;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 18px;
+      border-radius: 10px;
       background: #f5f5f5;
-      text-align: center;
+    }
+
+    input {
+      font-size: 16px;   /* 🔥 stops iOS zoom */
     }
   </style>
 </head>
@@ -480,6 +486,12 @@ let answerInput=document.getElementById("answer");
 let result=document.getElementById("result");
 let keypad=document.getElementById("keypad");
 let kbToggle=document.getElementById("kbToggle");
+
+answerInput.addEventListener("focus", () => {
+  if (!keyboardEnabled) {
+    answerInput.blur();   // 🚫 stops zoom + keyboard on iPhone
+  }
+});
 
 function setQ(t){ document.getElementById("question").innerText=t; }
 
