@@ -70,12 +70,18 @@
     }
 
     #result {
-      position: sticky;
-      bottom: 5px;
-      background: white;
-      padding: 5px;
+      position: fixed;
+      bottom: 10px;
+      left: 0;
+      width: 100%;
+      text-align: center;
       font-size: 18px;
       font-weight: bold;
+      background: white;
+      padding: 8px 0;
+      box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+      z-index: 999;
+      transition: transform 0.2s ease, opacity 0.2s ease;
     }
     
     body {
@@ -84,7 +90,9 @@
       margin: 10px;
       overflow-y: auto;        /* allow vertical scroll */
       height: 100vh;
+      padding-bottom: 60px; /* space for result bar */
     }
+
   </style>
 </head>
 <body>
@@ -170,7 +178,9 @@ function startTimer(){
       clearInterval(timerInterval);
       timedOut = true;
 
+      result.style.opacity = 0;
       result.innerText = `⏱ Time up! Correct: ${answer}`;
+      setTimeout(()=> result.style.opacity = 1, 50);
 
       evaluated = true;   // ✅ FIX: prevents freeze
     }
@@ -463,9 +473,13 @@ function checkAnswer(){
   let user=answerInput.value.trim();
 
   if(user==answer){
+    result.style.opacity = 0;
     result.innerText="✅ Correct";
+    setTimeout(()=> result.style.opacity = 1, 50);
   } else {
+    result.style.opacity = 0;
     result.innerText=`❌ Correct: ${answer}`;
+    setTimeout(()=> result.style.opacity = 1, 50);
   }
 
   evaluated = true;
