@@ -39,10 +39,6 @@
       min-width: 40px;
       background: #f5f5f5;
     }
-    
-    .key:active {
-      background: #ddd;
-    }
   </style>
 </head>
 <body>
@@ -90,8 +86,11 @@
 <div id="gameArea" style="display:none;"></div>
 
 <input id="answer" placeholder="Your answer" readonly inputmode="none"/>
-<button onclick="toggleKeyboard()">Toggle Keyboard</button>
+
+<button id="kbToggle" onclick="toggleKeyboard()">Enable Device Keyboard</button>
+
 <div id="keypad" style="display:none; margin-top:15px;"></div>
+
 <br>
 
 <button onclick="handleSubmit()">Submit</button>
@@ -103,30 +102,56 @@
 <script>
 
 let score=0, evaluated=false, answer;
+let keyboardEnabled=false;
 
 // -------- HELPERS --------
 function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
 function isPerfectSquare(n){ return Number.isInteger(Math.sqrt(n)); }
 function isPerfectCube(n){ return Number.isInteger(Math.cbrt(n)); }
+
 function getConsecutiveBase(n){
   for(let i=1;i<=Math.sqrt(n);i++){
     if(i*(i+1)===n) return i;
   }
   return null;
 }
+
+// -------- KEYBOARD TOGGLE (FIXED) --------
+function toggleKeyboard(){
+  let input=document.getElementById("answer");
+  let btn=document.getElementById("kbToggle");
+
+  keyboardEnabled=!keyboardEnabled;
+
+  if(keyboardEnabled){
+    input.removeAttribute("readonly");
+    input.focus();
+    btn.innerText="Disable Device Keyboard";
+    btn.style.background="#4CAF50";
+    btn.style.color="white";
+  } else {
+    input.setAttribute("readonly",true);
+    input.blur();
+    btn.innerText="Enable Device Keyboard";
+    btn.style.background="";
+    btn.style.color="";
+  }
+}
+
+// -------- KEYPAD --------
 function renderKeypad(){
-  let keys = ["1","2","3","4","5","6","7","8","9","0",".","*","/","%","←","C"];
-  let kp = document.getElementById("keypad");
+  let keys=["1","2","3","4","5","6","7","8","9","0",".","*","/","%","←","C"];
+  let kp=document.getElementById("keypad");
 
   kp.innerHTML="";
 
   keys.forEach(k=>{
-    let btn = document.createElement("div");
+    let btn=document.createElement("div");
     btn.className="key";
     btn.innerText=k;
 
     btn.onclick=()=>{
-      let input = document.getElementById("answer");
+      let input=document.getElementById("answer");
 
       if(k==="C") input.value="";
       else if(k==="←") input.value=input.value.slice(0,-1);
@@ -144,6 +169,7 @@ function handleGameToggle(){
   if(gameMode.checked) patternMode.checked=false;
   toggleGameMode();
 }
+
 function handlePatternToggle(){
   if(patternMode.checked) gameMode.checked=false;
   toggleGameMode();
@@ -172,13 +198,17 @@ function generateQuestion(){
 
   if(gameMode.checked){
     generateGame();
-    document.getElementById("keypad").style.display="none";
+    keypad.style.display="none";
+    kbToggle.style.display="none";
     return;
   }
 
   gameArea.style.display="none";
   answerInput.style.display="inline-block";
-  document.getElementById("keypad").style.display="block";
+
+  keypad.style.display="block";
+  kbToggle.style.display="inline-block";
+
   renderKeypad();
 
   let m=mode.value;
@@ -204,46 +234,37 @@ function generateQuestion(){
 
   else if(m==="table"){
     let a=rand(2,20), b=rand(2,10);
-  
     if(dir==="forward"){
       answer=a*b;
       setQ(`${a}×${b}=?`);
     } else {
       answer=`${a}*${b}`;
-      setQ(`${a*b} = ?`);
+      setQ(`${a*b}=?`);
     }
   }
 
   else if(m==="factor"){
     let a=rand(6,30), b=rand(6,30);
-  
     if(dir==="forward"){
       answer=a*b;
       setQ(`${a}×${b}=?`);
     } else {
       answer=`${a}*${b}`;
-      setQ(`${a*b} = ?`);
+      setQ(`${a*b}=?`);
     }
-  }
-
-  else if(m==="ratio"){
-    let a=rand(2,10), b=rand(2,10);
-    answer=`${a}:${b}`;
-    setQ(`${a*10}:${b*10} simplify`);
   }
 
   else if(m.startsWith("percent")){
     let num = (m==="percent_mix") ? rand(1,10) : parseInt(m.replace("percent",""));
     let den = rand(num+1,30);
-
-    let percent = ((num/den)*100).toFixed(2);
+    let percent=((num/den)*100).toFixed(2);
 
     if(dir==="forward"){
       answer=`${num}/${den}`;
-      setQ(`${percent}% = ?`);
+      setQ(`${percent}%=?`);
     } else {
       answer=percent;
-      setQ(`${num}/${den} = ?%`);
+      setQ(`${num}/${den}=?%`);
     }
   }
 
@@ -256,10 +277,9 @@ function generateQuestion(){
   answerInput.value="";
 }
 
-// -------- ✅ RESTORED GAME MODE --------
+// -------- GAME MODE (UNCHANGED) --------
 function generateGame(){
   let m=mode.value;
-
   answerInput.style.display="none";
   gameArea.style.display="block";
 
@@ -337,23 +357,11 @@ function handleSubmit(){
 function checkAnswer(){
   let user=answerInput.value.trim();
 
-  // handle reverse format a*b
-  if(typeof answer==="string" && answer.includes("*")){
-    let parts=user.split("*").map(Number);
-    if(parts.length===2 && parts[0]*parts[1]===eval(answer)){
-      score++;
-      result.innerText="✅ Correct";
-    } else {
-      result.innerText=`❌ Correct: ${answer}`;
-    }
-  }
-  else{
-    if(user==answer){
-      score++;
-      result.innerText="✅ Correct";
-    } else {
-      result.innerText=`❌ Correct: ${answer}`;
-    }
+  if(user==answer){
+    score++;
+    result.innerText="✅ Correct";
+  } else {
+    result.innerText=`❌ Correct: ${answer}`;
   }
 
   scoreEl.innerText=score;
@@ -370,20 +378,6 @@ function nextQuestion(){
 
 // -------- UI --------
 let gameMode=document.getElementById("gameMode");
-let keyboardEnabled = false;
-function toggleKeyboard(){
-  let input = document.getElementById("answer");
-
-  keyboardEnabled = !keyboardEnabled;
-
-  if(keyboardEnabled){
-    input.removeAttribute("readonly");
-    input.focus();
-  } else {
-    input.setAttribute("readonly", true);
-    input.blur();
-  }
-}
 let patternMode=document.getElementById("patternMode");
 let mode=document.getElementById("mode");
 let direction=document.getElementById("direction");
@@ -391,6 +385,8 @@ let gameArea=document.getElementById("gameArea");
 let answerInput=document.getElementById("answer");
 let scoreEl=document.getElementById("score");
 let result=document.getElementById("result");
+let keypad=document.getElementById("keypad");
+let kbToggle=document.getElementById("kbToggle");
 
 function setQ(t){ document.getElementById("question").innerText=t; }
 
