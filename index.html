@@ -3,41 +3,62 @@
 <head>
   <title>Quant Trainer PRO</title>
   <style>
-    body { font-family: Arial; text-align: center; margin-top: 30px; }
-    #question { font-size: 32px; margin: 20px; }
-
-    input, select { padding: 10px; font-size: 16px; margin: 8px; }
-    button { padding: 10px 18px; margin: 5px; }
-
-    .number-box {
-      display: inline-block;
-      padding: 15px;
-      margin: 8px;
-      border: 2px solid #333;
-      cursor: pointer;
-      font-size: 20px;
-      border-radius: 8px;
-      min-width: 60px;
-      line-height: 1.4;
-    }
-
-    .selected { background: #ddd; }
-    .correct { background: #4CAF50; color: white; }
-    .wrong { background: #f44336; color: white; }
-    .missed { background: #ffc107; }
-
-    .small { font-size: 14px; }
-
-    .key {
-      display: inline-block;
-      padding: 10px 14px;
-      margin: 5px;
-      border: 2px solid #333;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 18px;
-      min-width: 40px;
-      background: #f5f5f5;
+    body { 
+      font-family: Arial; 
+      text-align: center; 
+      margin-top: 30px; 
+    } 
+    #question { 
+      font-size: 32px; 
+      margin: 20px; 
+    } 
+    input, select { 
+      padding: 10px; 
+      font-size: 16px; 
+      margin: 8px; 
+    } 
+    button { 
+      padding: 10px 18px; 
+      margin: 5px; 
+    } 
+    .number-box { 
+      display: inline-block; 
+      padding: 15px; 
+      margin: 8px; 
+      border: 2px solid #333; 
+      cursor: pointer; 
+      font-size: 20px; 
+      border-radius: 8px; 
+      min-width: 60px; 
+      line-height: 1.4; 
+    } 
+    .selected { 
+      background: #ddd; 
+    } 
+    .correct { 
+      background: #4CAF50; 
+      color: white; 
+    } 
+    .wrong { 
+      background: #f44336; 
+      color: white; 
+    } 
+    .missed { 
+      background: #ffc107; 
+    } 
+    .small { 
+      font-size: 14px; 
+    } 
+    .key { 
+      display: inline-block; 
+      padding: 10px 14px; 
+      margin: 5px; 
+      border: 2px solid #333; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-size: 18px; 
+      min-width: 40px; 
+      background: #f5f5f5; 
     }
   </style>
 </head>
@@ -124,7 +145,10 @@ function startTimer(){
     if(timeLeft<=0){
       clearInterval(timerInterval);
       timedOut = true;
+
       result.innerText = `⏱ Time up! Correct: ${answer}`;
+
+      evaluated = true;   // ✅ FIX: prevents freeze
     }
   },1000);
 }
@@ -293,9 +317,106 @@ function generateQuestion(){
   startTimer();
 }
 
-// -------- GAME MODE (UNCHANGED) --------
-function generateGame(){ /* same */ }
-function submitGame(){ /* same */ }
+// -------- GAME MODE --------
+function generateGame(){
+  gameArea.style.display="block";
+  answerInput.style.display="none";
+  keypad.style.display="none";
+  kbToggle.style.display="none";
+
+  result.innerText="";
+  gameArea.innerHTML="";
+
+  let m = mode.value;
+  let numbers=[];
+  let correctSet=new Set();
+
+  let title="";
+
+  if(m==="square"){
+    title="Select PERFECT SQUARES";
+    while(correctSet.size<3){
+      let n=rand(5,20);
+      correctSet.add(n*n);
+    }
+  }
+
+  else if(m==="cube"){
+    title="Select PERFECT CUBES";
+    while(correctSet.size<3){
+      let n=rand(3,10);
+      correctSet.add(n*n*n);
+    }
+  }
+
+  else if(m==="consecutive"){
+    title="Select n × (n+1)";
+    while(correctSet.size<3){
+      let n=rand(3,15);
+      correctSet.add(n*(n+1));
+    }
+  }
+
+  setQ(title);
+
+  numbers = [...correctSet];
+
+  while(numbers.length<12){
+    let r=rand(10,300);
+    if(!correctSet.has(r)) numbers.push(r);
+  }
+
+  numbers.sort(()=>Math.random()-0.5);
+
+  numbers.forEach(num=>{
+    let div=document.createElement("div");
+    div.className="number-box";
+    div.innerText=num;
+
+    div.onclick=()=>{
+      if(evaluated) return;
+      div.classList.toggle("selected");
+    };
+
+    gameArea.appendChild(div);
+  });
+
+  answer = correctSet;
+  evaluated=false;
+}
+
+function submitGame(){
+  if(evaluated) return;
+
+  let boxes=document.querySelectorAll(".number-box");
+  let userSet=new Set();
+
+  boxes.forEach(box=>{
+    if(box.classList.contains("selected")){
+      userSet.add(parseInt(box.innerText));
+    }
+  });
+
+  boxes.forEach(box=>{
+    let val=parseInt(box.innerText);
+
+    if(answer.has(val)){
+      box.classList.add("correct");
+
+      let base = getConsecutiveBase(val);
+      if(base){
+        box.innerHTML = `${val}<div class="small">${base} × ${base+1}</div>`;
+      }
+
+    } else if(userSet.has(val)){
+      box.classList.add("wrong");
+    } else if(answer.has(val)){
+      box.classList.add("missed");
+    }
+  });
+
+  evaluated=true;
+}
 
 // -------- SUBMIT --------
 function handleSubmit(){
@@ -304,7 +425,7 @@ function handleSubmit(){
 }
 
 function checkAnswer(){
-  if(timedOut) return;
+  if(timedOut && evaluated) return;   // ✅ FIX
 
   clearInterval(timerInterval);
 
@@ -315,10 +436,21 @@ function checkAnswer(){
   } else {
     result.innerText=`❌ Correct: ${answer}`;
   }
+
+  evaluated = true;
 }
 
 // -------- NEXT --------
 function nextQuestion(){
+  if(!evaluated){
+    if(gameMode.checked){
+      submitGame();
+    } else {
+      checkAnswer();
+    }
+    return;
+  }
+
   clearInterval(timerInterval);
   generateQuestion();
 }
@@ -336,9 +468,12 @@ let kbToggle=document.getElementById("kbToggle");
 
 function setQ(t){ document.getElementById("question").innerText=t; }
 
-// ✅ ONLY CHANGE
-patternMode.checked = true;
-handlePatternToggle();
+// SAFE INIT
+if(!gameMode.checked && !patternMode.checked){
+  patternMode.checked = true;
+}
+
+toggleGameMode();
 
 </script>
 
