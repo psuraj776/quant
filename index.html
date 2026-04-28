@@ -487,6 +487,12 @@ let result=document.getElementById("result");
 let keypad=document.getElementById("keypad");
 let kbToggle=document.getElementById("kbToggle");
 
+answerInput.addEventListener("focus", () => {
+  if (!keyboardEnabled) {
+    answerInput.blur();   // 🚫 stops zoom + keyboard on iPhone
+  }
+});
+
 function setQ(t){ document.getElementById("question").innerText=t; }
 
 // SAFE INIT
