@@ -507,9 +507,35 @@ function submitGame(){
       box.classList.add("wrong");
   
     } else if(answer.has(val) && !userSet.has(val)){
-      // ⚠️ missed correct
-      box.classList.add("missed");
-    }
+        box.classList.add("missed");
+      
+        let display = "";
+      
+        if(mode.value === "square"){
+          let root = Math.sqrt(val);
+          if(Number.isInteger(root)){
+            display = root;
+          }
+        }
+      
+        else if(mode.value === "cube"){
+          let root = Math.cbrt(val);
+          if(Number.isInteger(root)){
+            display = root;
+          }
+        }
+      
+        else if(mode.value === "consecutive"){
+          let base = getConsecutiveBase(val);
+          if(base){
+            display = `${base} × ${base+1}`;
+          }
+        }
+      
+        if(display){
+          box.innerHTML = `${val}<div class="small">${display}</div>`;
+        }
+      }
   });
 
   evaluated=true;
