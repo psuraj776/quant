@@ -2,147 +2,163 @@
 <html>
 <head>
   <title>Quant Trainer PRO</title>
-
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000000">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-
   <style>
+    body { 
+      font-family: Arial; 
+      text-align: center; 
+      margin-top: 10px; 
+    } 
+    #question { 
+      font-size: 26px; 
+      margin: 10px; 
+    } 
+    input, select { 
+      padding: 8px; 
+      font-size: 16px; 
+      margin: 5px; 
+    } 
+    button {
+      padding: 8px 14px;
+      margin: 4px;
+    }
+    .number-box { 
+      display: inline-block; 
+      padding: 15px; 
+      margin: 8px; 
+      border: 2px solid #333; 
+      cursor: pointer; 
+      font-size: 20px; 
+      border-radius: 8px; 
+      min-width: 60px; 
+      line-height: 1.4; 
+    } 
+    .selected { 
+      background: #ddd; 
+    } 
+    .correct { 
+      background: #4CAF50; 
+      color: white; 
+    } 
+    .wrong { 
+      background: #f44336; 
+      color: white; 
+    } 
+    .missed { 
+      background: #ffc107; 
+    } 
+    .small { 
+      font-size: 14px; 
+    } 
+    #keypad {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;              /* reduced */
+      max-width: 220px;      /* reduced */
+      margin: 10px auto;     /* reduced */
+    }
+    
+    .key {
+      height: 45px;          /* was 55px */
+      font-size: 18px;       /* slightly smaller */
+      border-radius: 8px;
+    }
 
-  html, body {
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-    font-family: Arial;
-  }
+    input {
+      font-size: 16px;   /* 🔥 stops iOS zoom */
+    }
 
-  body {
-    display: flex;
-    flex-direction: column;
-  }
+    #result {
+      position: fixed;
+      bottom: 10px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      background: white;
+      padding: 8px 0;
+      box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+      z-index: 999;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    
+    body {
+      font-family: Arial;
+      text-align: center;
+      margin: 10px;
+      overflow-y: auto;
+      height: 100vh;
+      padding-bottom: 100px; /* ⬅️ increased space */
+    }
 
-  /* -------- TOP -------- */
-  .top {
-    text-align: center;
-    padding: 5px;
-  }
-
-  /* -------- MAIN -------- */
-  .main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-evenly;
-  }
-
-  #question {
-    font-size: 28px;
-  }
-
-  input, select {
-    padding: 8px;
-    font-size: 16px;
-  }
-
-  button {
-    padding: 10px 16px;
-    margin: 5px;
-    z-index: 2;
-  }
-
-  /* -------- KEYPAD -------- */
-  #keypad {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    width: 220px;
-  }
-
-  .key {
-    height: 50px;
-    border: 2px solid #333;
-    border-radius: 8px;
-    font-size: 18px;
-  }
-
-  /* -------- BOTTOM -------- */
-  .bottom {
-    text-align: center;
-    padding: 10px;
-    z-index: 2;
-  }
-
-  #result {
-    font-size: 18px;
-    font-weight: bold;
-    min-height: 24px;
-  }
-
-  /* -------- GAME -------- */
-  .number-box {
-    display: inline-block;
-    padding: 12px;
-    margin: 6px;
-    border: 2px solid #333;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-
-  .correct { background:#4CAF50; color:white; }
-  .wrong { background:#f44336; color:white; }
-  .selected { background:#ddd; }
+    button {
+      padding: 10px 18px;
+      margin: 5px;
+      position: relative;
+      z-index: 1; /* ensures they stay above layout issues */
+    }
 
   </style>
 </head>
-
 <body>
 
-<div class="top">
-  <h2>Quant Practice Trainer</h2>
+<h2>Quant Practice Trainer</h2>
 
-  <label><input type="checkbox" id="patternMode"> Pattern Mode</label>
-  <label><input type="checkbox" id="gameMode"> Game Mode</label>
+<label>
+  <input type="checkbox" id="patternMode" onchange="handlePatternToggle()"> Pattern Mode
+</label>
 
-  <br>
+<label>
+  <input type="checkbox" id="gameMode" onchange="handleGameToggle()"> Game Mode
+</label>
 
-  <select id="mode">
-    <option value="factor">Factor</option>
-    <option value="table">Table Practice</option>
-    <option value="consecutive">Consecutive</option>
-    <option value="square">Square</option>
-    <option value="cube">Cube</option>
-  </select>
+<br>
 
-  <select id="direction">
-    <option value="forward">Forward</option>
-    <option value="reverse">Reverse</option>
-  </select>
-</div>
+<select id="mode">
+  <option value="factor">Factor</option>
+  <option value="table">Table Practice</option>
+  <option value="percent_mix">Percent Mix</option>
+  <option value="percent1">1/x</option>
+  <option value="percent2">2/x</option>
+  <option value="percent3">3/x</option>
+  <option value="percent4">4/x</option>
+  <option value="percent5">5/x</option>
+  <option value="percent6">6/x</option>
+  <option value="percent7">7/x</option>
+  <option value="percent8">8/x</option>
+  <option value="percent9">9/x</option>
+  <option value="percent10">10/x</option>
+  <option value="consecutive">Consecutive</option>
+  <option value="power_mix">Square/Cube Mix</option>
+  <option value="square">Square</option>
+  <option value="cube">Cube</option>
+  <option value="ratio">Ratio</option>
+  <option value="mixed">Mixed Simplification</option>
+</select>
 
+<select id="direction">
+  <option value="forward">Forward</option>
+  <option value="reverse">Reverse</option>
+</select>
 
-<div class="main">
+<div id="question"></div>
+<p id="timer" style="font-size:20px; color:#cc0000;"></p>
+<p id="result"></p>
 
-  <div id="question"></div>
-  <p id="timer"></p>
+<div id="gameArea" style="display:none;"></div>
 
-  <input id="answer" readonly inputmode="none" placeholder="Your answer"/>
+<input id="answer" placeholder="Your answer" readonly inputmode="none"/>
 
-  <button id="kbToggle">Enable Device Keyboard</button>
+<button id="kbToggle" onclick="toggleKeyboard()">Enable Device Keyboard</button>
 
-  <div id="keypad"></div>
+<div id="keypad"></div>
 
-  <div id="gameArea"></div>
+<br>
 
-</div>
-
-
-<div class="bottom">
-
-  <button onclick="handleSubmit()">Submit</button>
-  <button onclick="nextQuestion()">Next</button>
-
-  <p id="result"></p>
-
-</div>
+<button onclick="handleSubmit()">Submit</button>
+<button onclick="nextQuestion()">Next</button>
 
 <script>
 
