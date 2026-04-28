@@ -159,14 +159,26 @@ function generateQuestion(){
 
   else if(m==="table"){
     let a=rand(2,20), b=rand(2,10);
-    answer=a*b;
-    setQ(`${a}×${b}=?`);
+  
+    if(dir==="forward"){
+      answer=a*b;
+      setQ(`${a}×${b}=?`);
+    } else {
+      answer=`${a}*${b}`;
+      setQ(`${a*b} = ?`);
+    }
   }
 
   else if(m==="factor"){
     let a=rand(6,30), b=rand(6,30);
-    answer=a*b;
-    setQ(`${a}×${b}=?`);
+  
+    if(dir==="forward"){
+      answer=a*b;
+      setQ(`${a}×${b}=?`);
+    } else {
+      answer=`${a}*${b}`;
+      setQ(`${a*b} = ?`);
+    }
   }
 
   else if(m==="ratio"){
@@ -280,11 +292,23 @@ function handleSubmit(){
 function checkAnswer(){
   let user=answerInput.value.trim();
 
-  if(user==answer){
-    score++;
-    result.innerText="✅ Correct";
-  } else {
-    result.innerText=`❌ Correct: ${answer}`;
+  // handle reverse format a*b
+  if(typeof answer==="string" && answer.includes("*")){
+    let parts=user.split("*").map(Number);
+    if(parts.length===2 && parts[0]*parts[1]===eval(answer)){
+      score++;
+      result.innerText="✅ Correct";
+    } else {
+      result.innerText=`❌ Correct: ${answer}`;
+    }
+  }
+  else{
+    if(user==answer){
+      score++;
+      result.innerText="✅ Correct";
+    } else {
+      result.innerText=`❌ Correct: ${answer}`;
+    }
   }
 
   scoreEl.innerText=score;
