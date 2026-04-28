@@ -382,45 +382,51 @@ function generateGame(){
   gameArea.innerHTML="";
 
   let m = mode.value;
-  let numbers=[];
-  let correctSet=new Set();
+  let numbers;
+  let correctSet = new Set();
 
   let title="";
 
   if(m==="square"){
     title="Select PERFECT SQUARES";
-    let required = rand(3,5);
-    while(correctSet.size < required){
-      let n=rand(5,20);
-      correctSet.add(n*n);
-    }
   }
 
   else if(m==="cube"){
     title="Select PERFECT CUBES";
-    let required = rand(3,5);
-    while(correctSet.size < required){
-      let n=rand(3,10);
-      correctSet.add(n*n*n);
-    }
   }
 
   else if(m==="consecutive"){
     title="Select n × (n+1)";
-    let required = rand(3,5);
-    while(correctSet.size < required){
-      let n=rand(3,15);
-      correctSet.add(n*(n+1));
-    }
   }
 
   setQ(title);
 
+  // ✅ ensure minimum correct answers
+  let required = rand(3,5);
+  
+  while(correctSet.size < required){
+    let n;
+  
+    if(m === "square"){
+      n = rand(5,20);
+      correctSet.add(n*n);
+    }
+    else if(m === "cube"){
+      n = rand(3,10);
+      correctSet.add(n*n*n);
+    }
+    else if(m === "consecutive"){
+      n = rand(3,15);
+      correctSet.add(n*(n+1));
+    }
+  }
+  
   numbers = [...correctSet];
-
-  while(numbers.length<12){
-    let r=rand(10,300);
-    if(!correctSet.has(r) && !numbers.includes(r)){
+  
+  // fill remaining random numbers
+  while(numbers.length < 12){
+    let r = rand(10,300);
+    if(!numbers.includes(r)){
       numbers.push(r);
     }
   }
@@ -440,7 +446,15 @@ function generateGame(){
     gameArea.appendChild(div);
   });
 
-  answer = correctSet;
+  if(m === "square"){
+    answer = new Set(numbers.filter(n => isPerfectSquare(n)));
+  }
+  else if(m === "cube"){
+    answer = new Set(numbers.filter(n => isPerfectCube(n)));
+  }
+  else if(m === "consecutive"){
+    answer = new Set(numbers.filter(n => getConsecutiveBase(n) !== null));
+  }
   evaluated=false;
 }
 
