@@ -89,7 +89,8 @@
 <div id="question"></div>
 <div id="gameArea" style="display:none;"></div>
 
-<input id="answer" placeholder="Your answer"/>
+<input id="answer" placeholder="Your answer" readonly inputmode="none"/>
+<button onclick="toggleKeyboard()">Toggle Keyboard</button>
 <div id="keypad" style="display:none; margin-top:15px;"></div>
 <br>
 
@@ -369,6 +370,20 @@ function nextQuestion(){
 
 // -------- UI --------
 let gameMode=document.getElementById("gameMode");
+let keyboardEnabled = false;
+function toggleKeyboard(){
+  let input = document.getElementById("answer");
+
+  keyboardEnabled = !keyboardEnabled;
+
+  if(keyboardEnabled){
+    input.removeAttribute("readonly");
+    input.focus();
+  } else {
+    input.setAttribute("readonly", true);
+    input.blur();
+  }
+}
 let patternMode=document.getElementById("patternMode");
 let mode=document.getElementById("mode");
 let direction=document.getElementById("direction");
