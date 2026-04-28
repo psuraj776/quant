@@ -120,7 +120,7 @@
 
 <button id="kbToggle" onclick="toggleKeyboard()">Enable Device Keyboard</button>
 
-<div id="keypad" style="display:none; margin-top:15px;"></div>
+<div id="keypad"></div>
 
 <br>
 
@@ -275,7 +275,7 @@ function generateQuestion(){
 
   gameArea.style.display="none";
   answerInput.style.display="inline-block";
-  keypad.style.display="block";
+  keypad.style.display="grid";
   kbToggle.style.display="inline-block";
 
   renderKeypad();
@@ -336,7 +336,7 @@ function generateQuestion(){
 function generateGame(){
   gameArea.style.display="block";
   answerInput.style.display="none";
-  keypad.style.display="none";
+  keypad.style.display="grid";
   kbToggle.style.display="none";
 
   result.innerText="";
