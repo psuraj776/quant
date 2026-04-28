@@ -9,21 +9,21 @@
     body { 
       font-family: Arial; 
       text-align: center; 
-      margin-top: 30px; 
+      margin-top: 10px; 
     } 
     #question { 
-      font-size: 32px; 
-      margin: 20px; 
+      font-size: 26px; 
+      margin: 10px; 
     } 
     input, select { 
-      padding: 10px; 
+      padding: 8px; 
       font-size: 16px; 
-      margin: 8px; 
-    } 
-    button { 
-      padding: 10px 18px; 
       margin: 5px; 
     } 
+    button {
+      padding: 8px 14px;
+      margin: 4px;
+    }
     .number-box { 
       display: inline-block; 
       padding: 15px; 
@@ -53,26 +53,37 @@
       font-size: 14px; 
     } 
     #keypad {
-      display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      max-width: 260px;
-      margin: 20px auto;
+      gap: 6px;              /* reduced */
+      max-width: 220px;      /* reduced */
+      margin: 10px auto;     /* reduced */
     }
     
     .key {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 55px;
-      font-size: 20px;
-      border: 2px solid #333;
-      border-radius: 10px;
-      background: #f5f5f5;
+      height: 45px;          /* was 55px */
+      font-size: 18px;       /* slightly smaller */
+      border-radius: 8px;
     }
 
     input {
       font-size: 16px;   /* 🔥 stops iOS zoom */
+    }
+
+    #result {
+      position: sticky;
+      bottom: 5px;
+      background: white;
+      padding: 5px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    body {
+      font-family: Arial;
+      text-align: center;
+      margin: 10px;
+      overflow-y: auto;        /* allow vertical scroll */
+      height: 100vh;
     }
   </style>
 </head>
@@ -119,6 +130,7 @@
 
 <div id="question"></div>
 <p id="timer" style="font-size:20px; color:#cc0000;"></p>
+<p id="result"></p>
 
 <div id="gameArea" style="display:none;"></div>
 
@@ -132,8 +144,6 @@
 
 <button onclick="handleSubmit()">Submit</button>
 <button onclick="nextQuestion()">Next</button>
-
-<p id="result"></p>
 
 <script>
 
@@ -342,7 +352,7 @@ function generateQuestion(){
 function generateGame(){
   gameArea.style.display="block";
   answerInput.style.display="none";
-  keypad.style.display="grid";
+  keypad.style.display="none";
   kbToggle.style.display="none";
 
   result.innerText="";
