@@ -118,23 +118,29 @@ function getConsecutiveBase(n){
 
 // -------- KEYBOARD TOGGLE (FIXED) --------
 function toggleKeyboard(){
-  let input=document.getElementById("answer");
-  let btn=document.getElementById("kbToggle");
+  let input = document.getElementById("answer");
+  let btn = document.getElementById("kbToggle");
 
-  keyboardEnabled=!keyboardEnabled;
+  keyboardEnabled = !keyboardEnabled;
 
   if(keyboardEnabled){
     input.removeAttribute("readonly");
+    input.removeAttribute("inputmode");   // allow mobile keyboard
+
     input.focus();
-    btn.innerText="Disable Device Keyboard";
-    btn.style.background="#4CAF50";
-    btn.style.color="white";
+    setTimeout(() => input.focus(), 50);  // ✅ iPhone reliability fix
+
+    btn.innerText = "Disable Device Keyboard";
+    btn.style.background = "#4CAF50";
+    btn.style.color = "white";
   } else {
-    input.setAttribute("readonly",true);
+    input.setAttribute("readonly", true);
+    input.setAttribute("inputmode", "none"); // block mobile keyboard
     input.blur();
-    btn.innerText="Enable Device Keyboard";
-    btn.style.background="";
-    btn.style.color="";
+
+    btn.innerText = "Enable Device Keyboard";
+    btn.style.background = "";
+    btn.style.color = "";
   }
 }
 
