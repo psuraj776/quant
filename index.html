@@ -321,25 +321,25 @@ function generateQuestion(){
   let dir=direction.value;
 
   if(m==="square"){
-    let n=rand(5,20);
+    let n=rand(11,40);
     answer=(dir==="forward")?n*n:n;
     setQ(dir==="forward"?`${n}²=?`:`${n*n}=?`);
   }
 
   else if(m==="cube"){
-    let n=rand(3,10);
+    let n=rand(3,20);
     answer=(dir==="forward")?n*n*n:n;
     setQ(dir==="forward"?`${n}³=?`:`${n*n*n}=?`);
   }
 
   else if(m==="consecutive"){
-    let n=rand(5,20);
+    let n=rand(5,30);
     answer=(dir==="forward")?n*(n+1):n;
     setQ(dir==="forward"?`${n}×${n+1}=?`:`${n*(n+1)}=?`);
   }
 
   else if(m==="table"){
-    let a=rand(2,20), b=rand(2,10);
+    let a=rand(11,40), b=rand(2,10);
     if(dir==="forward"){ answer=a*b; setQ(`${a}×${b}=?`); }
     else { answer=`${a}*${b}`; setQ(`${a*b}=?`); }
   }
