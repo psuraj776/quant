@@ -261,35 +261,43 @@
 
     #result {
       margin-top: 14px;
-      min-height: 30px;
+      min-height: 58px;
       padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       border-radius: 16px;
+      border: 1px solid transparent;
       font-size: 17px;
       font-weight: 800;
       line-height: 1.45;
       color: var(--ink);
+      text-align: center;
+      transition: opacity 0.16s ease, background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
     }
 
     #result:empty {
       visibility: hidden;
-      padding: 0;
-      min-height: 0;
+      opacity: 0;
     }
 
     #result.result-success {
       background: var(--success-soft);
+      border-color: rgba(21, 115, 71, 0.18);
       color: var(--success);
       visibility: visible;
     }
 
     #result.result-danger {
       background: var(--danger-soft);
+      border-color: rgba(181, 52, 52, 0.18);
       color: var(--danger);
       visibility: visible;
     }
 
     #result.result-warning {
       background: var(--warning-soft);
+      border-color: rgba(157, 98, 0, 0.2);
       color: var(--warning);
       visibility: visible;
     }
@@ -605,6 +613,7 @@
 
     function clearResultMessage() {
       result.className = "";
+      result.style.opacity = 0;
       result.innerText = "";
     }
 
