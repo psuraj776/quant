@@ -1,631 +1,1179 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Quant Trainer PRO</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#17344f">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <style>
-    body { 
-      font-family: Arial; 
-      text-align: center; 
-      margin-top: 10px; 
-    } 
-    #question { 
-      font-size: 26px; 
-      margin: 10px; 
-    } 
-    input, select { 
-      padding: 8px; 
-      font-size: 16px; 
-      margin: 5px; 
-    } 
-    button {
-      padding: 8px 14px;
-      margin: 4px;
-    }
-    .number-box { 
-      display: inline-block; 
-      padding: 15px; 
-      margin: 8px; 
-      border: 2px solid #333; 
-      cursor: pointer; 
-      font-size: 20px; 
-      border-radius: 8px; 
-      min-width: 60px; 
-      line-height: 1.4; 
-    } 
-    .selected { 
-      background: #ddd; 
-    } 
-    .correct { 
-      background: #4CAF50; 
-      color: white; 
-    } 
-    .wrong { 
-      background: #f44336; 
-      color: white; 
-    } 
-    .missed { 
-      background: #ffc107; 
-    } 
-    .small { 
-      font-size: 14px; 
-    } 
-    #keypad {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;              /* reduced */
-      max-width: 220px;      /* reduced */
-      margin: 10px auto;     /* reduced */
-    }
-    
-    .key {
-      height: 45px;          /* was 55px */
-      font-size: 18px;       /* slightly smaller */
-      border-radius: 8px;
+    :root {
+      --bg-top: #f6efe2;
+      --bg-bottom: #dce8ef;
+      --panel: rgba(255, 250, 244, 0.96);
+      --panel-strong: #fffdf8;
+      --ink: #17344f;
+      --muted: #6b7f8f;
+      --accent: #c95c2f;
+      --accent-strong: #9e3f1a;
+      --border: #d7c6b3;
+      --shadow: 0 22px 46px rgba(23, 52, 79, 0.14);
+      --success: #157347;
+      --success-soft: #dff5e8;
+      --danger: #b53434;
+      --danger-soft: #fde4e4;
+      --warning: #9d6200;
+      --warning-soft: #fff0c7;
+      --chip: #eef4f8;
     }
 
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.9), transparent 30%),
+        linear-gradient(160deg, var(--bg-top) 0%, #f5f2ea 34%, var(--bg-bottom) 100%);
+    }
+
+    .app-shell {
+      width: min(1080px, calc(100% - 24px));
+      margin: 18px auto 42px;
+    }
+
+    .hero,
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(215, 198, 179, 0.92);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 24px;
+      background:
+        linear-gradient(145deg, rgba(255, 249, 240, 0.98), rgba(245, 250, 255, 0.94)),
+        var(--panel);
+    }
+
+    .panel {
+      margin-top: 18px;
+      padding: 20px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #fff1e7;
+      color: var(--accent-strong);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 16px 0 10px;
+      font-size: clamp(30px, 4.8vw, 50px);
+      line-height: 1.05;
+    }
+
+    .hero-copy {
+      margin: 0;
+      max-width: 820px;
+      font-size: 16px;
+      line-height: 1.68;
+      color: #36556d;
+    }
+
+    .toggle-row,
+    .control-grid,
+    .input-row,
+    .action-row {
+      display: grid;
+      gap: 14px;
+    }
+
+    .toggle-row {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin-top: 20px;
+    }
+
+    .toggle-card,
+    .control-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid rgba(215, 198, 179, 0.88);
+    }
+
+    .toggle-card {
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .toggle-card input {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--accent);
+      flex: 0 0 auto;
+    }
+
+    .toggle-card strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 15px;
+    }
+
+    .toggle-card small {
+      display: block;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .control-grid {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .control-card {
+      display: block;
+      text-align: left;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    select,
+    input,
+    button {
+      width: 100%;
+      font: inherit;
+      border-radius: 16px;
+      border: 1px solid #c9b096;
+      background: #fffdf8;
+      color: var(--ink);
+    }
+
+    select,
     input {
-      font-size: 16px;   /* 🔥 stops iOS zoom */
+      padding: 14px 16px;
+      font-size: 16px;
+      min-height: 52px;
+    }
+
+    select:disabled {
+      background: #f0ece6;
+      color: #8a98a4;
+      cursor: not-allowed;
+    }
+
+    button {
+      padding: 13px 18px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(23, 52, 79, 0.12);
+    }
+
+    select:focus,
+    input:focus,
+    button:focus {
+      outline: 3px solid rgba(201, 92, 47, 0.16);
+      outline-offset: 2px;
+    }
+
+    .primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff8f4;
+    }
+
+    .secondary {
+      background: #fff2e8;
+      border-color: #e6b48f;
+      color: var(--accent-strong);
+    }
+
+    .ghost {
+      background: #ffffff;
+    }
+
+    .soft-active {
+      background: #e7f1f8;
+      border-color: #7ea3be;
+      color: #1c587d;
+    }
+
+    #question {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 48px);
+      line-height: 1.1;
+      font-weight: 900;
+      letter-spacing: 0.01em;
+      text-align: center;
+    }
+
+    #timer,
+    #result {
+      margin: 0;
+      text-align: center;
+    }
+
+    #timer {
+      width: fit-content;
+      margin: 18px auto 0;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: #fff2e2;
+      color: #a4510d;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    #timer.warning {
+      background: #ffe0e0;
+      color: #a32020;
     }
 
     #result {
-      text-align: center;
-      font-size: 18px;
-      font-weight: bold;
-      margin-top: 10px;
-      min-height: 28px;   /* ✅ reserves space */
-      line-height: 28px;  /* ✅ keeps alignment clean */
+      margin-top: 14px;
+      min-height: 30px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1.45;
+      color: var(--ink);
     }
 
     #result:empty {
       visibility: hidden;
+      padding: 0;
+      min-height: 0;
     }
-    
-    body {
-      font-family: Arial;
+
+    #result.result-success {
+      background: var(--success-soft);
+      color: var(--success);
+      visibility: visible;
+    }
+
+    #result.result-danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+      visibility: visible;
+    }
+
+    #result.result-warning {
+      background: var(--warning-soft);
+      color: var(--warning);
+      visibility: visible;
+    }
+
+    #gameArea {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .number-box {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 84px;
+      padding: 14px 10px;
+      border: 2px solid rgba(23, 52, 79, 0.14);
+      border-radius: 18px;
+      background: var(--panel-strong);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+      cursor: pointer;
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .number-box:hover {
+      transform: translateY(-1px);
+    }
+
+    .number-box.selected {
+      background: #e9f1f8;
+      border-color: #5b88a8;
+      color: #17415d;
+    }
+
+    .number-box.correct {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+
+    .number-box.wrong {
+      background: var(--danger);
+      border-color: var(--danger);
+      color: white;
+    }
+
+    .number-box.missed {
+      background: #ffedbb;
+      border-color: #d79e14;
+      color: #8a5b00;
+    }
+
+    .small {
+      margin-top: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      opacity: 0.92;
+    }
+
+    .input-row {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      margin-top: 18px;
+    }
+
+    #answer {
+      font-size: 19px;
+      font-weight: 700;
       text-align: center;
-      margin: 10px;
-      overflow-y: auto;
-      height: 100vh;
-      padding-bottom: 100px; /* ⬅️ increased space */
     }
 
-    button {
-      padding: 10px 18px;
-      margin: 5px;
-      position: relative;
-      z-index: 1; /* ensures they stay above layout issues */
+    #kbToggle {
+      min-width: 230px;
     }
 
+    #keypad {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      max-width: 340px;
+      margin: 16px auto 0;
+    }
+
+    #keypad[style*="display: none"] {
+      display: none !important;
+    }
+
+    .key {
+      min-height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #ffffff, #f0f4f7);
+      border: 1px solid rgba(124, 145, 160, 0.42);
+      color: var(--ink);
+    }
+
+    .action-row {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      margin-top: 18px;
+    }
+
+    .meta-note {
+      margin: 18px 0 0;
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      .app-shell {
+        width: min(100%, calc(100% - 16px));
+        margin-top: 10px;
+      }
+
+      .hero,
+      .panel {
+        border-radius: 22px;
+        padding: 16px;
+      }
+
+      .input-row {
+        grid-template-columns: 1fr;
+      }
+
+      #kbToggle {
+        min-width: 0;
+      }
+
+      #gameArea {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      #question {
+        font-size: 28px;
+      }
+    }
   </style>
 </head>
 <body>
+  <main class="app-shell">
+    <section class="hero">
+      <div class="eyebrow">Mental Math Drill Deck</div>
+      <h1>Quant Practice Trainer</h1>
+      <p class="hero-copy">
+        Same content flow, cleaner visuals. Pattern mode keeps your single-answer timed drills, and game mode keeps
+        the tap-to-select rounds for squares, cubes, and consecutive products.
+      </p>
+      <div class="toggle-row">
+        <label class="toggle-card">
+          <input type="checkbox" id="patternMode" onchange="handlePatternToggle()">
+          <span>
+            <strong>Pattern Mode</strong>
+            <small>Single-answer practice with the original 7-second timer.</small>
+          </span>
+        </label>
+        <label class="toggle-card">
+          <input type="checkbox" id="gameMode" onchange="handleGameToggle()">
+          <span>
+            <strong>Game Mode</strong>
+            <small>Tap every matching number before time runs out.</small>
+          </span>
+        </label>
+      </div>
+    </section>
 
-<h2>Quant Practice Trainer</h2>
+    <section class="panel">
+      <div class="control-grid">
+        <div class="control-card">
+          <label class="form-label" for="mode">Topic</label>
+          <select id="mode">
+            <option value="factor">Factor</option>
+            <option value="table">Table Practice</option>
+            <option value="percent_mix">Percent Mix</option>
+            <option value="percent1">1/x</option>
+            <option value="percent2">2/x</option>
+            <option value="percent3">3/x</option>
+            <option value="percent4">4/x</option>
+            <option value="percent5">5/x</option>
+            <option value="percent6">6/x</option>
+            <option value="percent7">7/x</option>
+            <option value="percent8">8/x</option>
+            <option value="percent9">9/x</option>
+            <option value="percent10">10/x</option>
+            <option value="consecutive">Consecutive</option>
+            <option value="power_mix">Square/Cube Mix</option>
+            <option value="square">Square</option>
+            <option value="cube">Cube</option>
+            <option value="ratio">Ratio</option>
+            <option value="mixed">Mixed Simplification</option>
+          </select>
+        </div>
+        <div class="control-card">
+          <label class="form-label" for="direction">Direction</label>
+          <select id="direction">
+            <option value="forward">Forward</option>
+            <option value="reverse">Reverse</option>
+          </select>
+        </div>
+        <div class="control-card">
+          <label class="form-label" for="timerSelect">Timer</label>
+          <select id="timerSelect">
+            <option value="0">Off</option>
+            <option value="5">5 seconds</option>
+            <option value="7" selected>7 seconds</option>
+            <option value="10">10 seconds</option>
+            <option value="15">15 seconds</option>
+            <option value="20">20 seconds</option>
+            <option value="30">30 seconds</option>
+            <option value="45">45 seconds</option>
+            <option value="60">60 seconds</option>
+          </select>
+        </div>
+      </div>
+    </section>
 
-<label>
-  <input type="checkbox" id="patternMode" onchange="handlePatternToggle()"> Pattern Mode
-</label>
+    <section class="panel">
+      <div id="question"></div>
+      <p id="timer"></p>
+      <p id="result"></p>
 
-<label>
-  <input type="checkbox" id="gameMode" onchange="handleGameToggle()"> Game Mode
-</label>
+      <div id="gameArea" style="display:none;"></div>
 
-<br>
+      <div class="input-row">
+        <input id="answer" placeholder="Your answer" readonly inputmode="none">
+        <button id="kbToggle" class="ghost" onclick="toggleKeyboard()">Enable Device Keyboard</button>
+      </div>
 
-<select id="mode">
-  <option value="factor">Factor</option>
-  <option value="table">Table Practice</option>
-  <option value="percent_mix">Percent Mix</option>
-  <option value="percent1">1/x</option>
-  <option value="percent2">2/x</option>
-  <option value="percent3">3/x</option>
-  <option value="percent4">4/x</option>
-  <option value="percent5">5/x</option>
-  <option value="percent6">6/x</option>
-  <option value="percent7">7/x</option>
-  <option value="percent8">8/x</option>
-  <option value="percent9">9/x</option>
-  <option value="percent10">10/x</option>
-  <option value="consecutive">Consecutive</option>
-  <option value="power_mix">Square/Cube Mix</option>
-  <option value="square">Square</option>
-  <option value="cube">Cube</option>
-  <option value="ratio">Ratio</option>
-  <option value="mixed">Mixed Simplification</option>
-</select>
+      <div id="keypad"></div>
 
-<select id="direction">
-  <option value="forward">Forward</option>
-  <option value="reverse">Reverse</option>
-</select>
+      <div class="action-row">
+        <button class="primary" onclick="handleSubmit()">Submit</button>
+        <button class="secondary" onclick="nextQuestion()">Next</button>
+      </div>
 
-<div id="question"></div>
-<p id="timer" style="font-size:20px; color:#cc0000;"></p>
-<p id="result"></p>
+      <p class="meta-note" id="modeNote">
+        Game mode stays limited to square, cube, and consecutive drills. Pattern mode keeps the original answer flow.
+      </p>
+    </section>
+  </main>
 
-<div id="gameArea" style="display:none;"></div>
+  <script>
+    let evaluated = false;
+    let answer = "";
+    let keyboardEnabled = false;
 
-<input id="answer" placeholder="Your answer" readonly inputmode="none"/>
+    let timerInterval = null;
+    let timeLeft = 7;
+    let timedOut = false;
 
-<button id="kbToggle" onclick="toggleKeyboard()">Enable Device Keyboard</button>
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
 
-<div id="keypad"></div>
-
-<br>
-
-<button onclick="handleSubmit()">Submit</button>
-<button onclick="nextQuestion()">Next</button>
-
-<script>
-
-let evaluated=false, answer;
-let keyboardEnabled=false;
-
-// ⏱ TIMER
-let timerInterval;
-let timeLeft = 7;
-let timedOut = false;
-
-// -------- TIMER --------
-function startTimer(){
-  clearInterval(timerInterval);
-  timeLeft = 7;
-  timedOut = false;
-  updateTimer();
-
-  timerInterval = setInterval(()=>{
-    timeLeft--;
-    updateTimer();
-
-    if(timeLeft<=0){
-      clearInterval(timerInterval);
-      timedOut = true;
-    
-      if(gameMode.checked){
-        submitGame();   // ✅ auto-evaluate
-        result.innerText = "⏱ Time up! Check highlights";
-      } else {
-        result.style.opacity = 0;
-        result.innerText = `⏱ Time up! Correct: ${answer}`;
-        setTimeout(()=> result.style.opacity = 1, 50);
+    function shuffle(list) {
+      const copy = list.slice();
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
       }
-    
+      return copy;
+    }
+
+    function isPerfectSquare(value) {
+      const root = Math.round(Math.sqrt(value));
+      return root * root === value;
+    }
+
+    function isPerfectCube(value) {
+      const root = Math.round(Math.cbrt(value));
+      return root * root * root === value;
+    }
+
+    function getConsecutiveBase(value) {
+      for (let i = 1; i <= Math.sqrt(value); i += 1) {
+        if (i * (i + 1) === value) return i;
+      }
+      return null;
+    }
+
+    function normalizeAnswerText(value) {
+      return String(value).trim().replace(/\s+/g, "").replace(/[xX\u00D7]/g, "*");
+    }
+
+    function isNumericText(value) {
+      return value !== "" && !Number.isNaN(Number(value));
+    }
+
+    function isAnswerCorrect(userValue, correctValue) {
+      const user = normalizeAnswerText(userValue);
+      const correct = normalizeAnswerText(correctValue);
+
+      if (!user) return false;
+
+      if (typeof correctValue === "number") {
+        return Number(user) === correctValue;
+      }
+
+      if (isNumericText(user) && isNumericText(correct)) {
+        return Number(user) === Number(correct);
+      }
+
+      return user === correct;
+    }
+
+    function setQ(text) {
+      questionEl.innerText = text;
+    }
+
+    function clearResultMessage() {
+      result.className = "";
+      result.innerText = "";
+    }
+
+    function setResultMessage(text, tone) {
+      result.className = tone ? `result-${tone}` : "";
+      result.style.opacity = 0;
+      result.innerText = text;
+      window.setTimeout(() => {
+        result.style.opacity = 1;
+      }, 40);
+    }
+
+    function stopTimer() {
+      if (timerInterval) {
+        window.clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    function getSelectedTimerSeconds() {
+      return Number(timerSelect.value || 7);
+    }
+
+    function updateTimer() {
+      const selectedSeconds = getSelectedTimerSeconds();
+
+      if (!selectedSeconds) {
+        timerEl.innerText = "Timer off";
+        timerEl.classList.remove("warning");
+        return;
+      }
+
+      timerEl.innerText = `${timeLeft}s`;
+      timerEl.classList.toggle("warning", timeLeft <= 3);
+    }
+
+    function startTimer() {
+      stopTimer();
+      timedOut = false;
+      const selectedSeconds = getSelectedTimerSeconds();
+
+      if (!selectedSeconds) {
+        timeLeft = 0;
+        updateTimer();
+        return;
+      }
+
+      timeLeft = selectedSeconds;
+      updateTimer();
+
+      timerInterval = window.setInterval(() => {
+        timeLeft -= 1;
+        updateTimer();
+
+        if (timeLeft <= 0) {
+          stopTimer();
+          timedOut = true;
+
+          if (gameMode.checked) {
+            submitGame();
+            setResultMessage("Time up! Check highlights.", "warning");
+          } else {
+            setResultMessage(`Time up! Correct: ${answer}`, "warning");
+          }
+
+          evaluated = true;
+        }
+      }, 1000);
+    }
+
+    function updateAnswerPlaceholder() {
+      const modeValue = mode.value;
+      const dir = direction.value;
+
+      if (gameMode.checked) {
+        answerInput.placeholder = "Your answer";
+        return;
+      }
+
+      if ((modeValue === "factor" || modeValue === "table") && dir === "reverse") {
+        answerInput.placeholder = "Type like 6*7";
+        return;
+      }
+
+      if (modeValue.startsWith("percent") && dir === "forward") {
+        answerInput.placeholder = "Type like 3/8";
+        return;
+      }
+
+      if (modeValue === "ratio") {
+        answerInput.placeholder = "Enter the missing number";
+        return;
+      }
+
+      if (modeValue === "power_mix" && dir === "reverse") {
+        answerInput.placeholder = "Enter the root";
+        return;
+      }
+
+      answerInput.placeholder = "Your answer";
+    }
+
+    function updateModeNote() {
+      const modeValue = mode.value;
+      const dir = direction.value;
+
+      if (gameMode.checked) {
+        modeNote.innerText = "Game mode keeps the same tap-and-check flow and stays limited to square, cube, and consecutive rounds.";
+        return;
+      }
+
+      if (modeValue === "power_mix") {
+        modeNote.innerText = "Square/Cube Mix now alternates square and cube questions. In reverse mode it shows ?^2 or ?^3 so the prompt stays clear.";
+        return;
+      }
+
+      if (modeValue === "ratio") {
+        modeNote.innerText = "Ratio mode asks for the missing value in an equivalent ratio and keeps the same single-answer flow.";
+        return;
+      }
+
+      if ((modeValue === "factor" || modeValue === "table") && dir === "reverse") {
+        modeNote.innerText = "Reverse factor and table questions expect a multiplication expression such as 6*7. The checker also accepts x or *.";
+        return;
+      }
+
+      if (modeValue.startsWith("percent") && dir === "forward") {
+        modeNote.innerText = "Percent-to-fraction rounds expect fraction form like 3/8. Numeric percent answers still accept clean number input.";
+        return;
+      }
+
+      const selectedSeconds = getSelectedTimerSeconds();
+      modeNote.innerText = selectedSeconds
+        ? `Pattern mode keeps the same mental-math flow with a ${selectedSeconds}-second timer.`
+        : "Pattern mode keeps the same mental-math flow with the timer turned off.";
+    }
+
+    function toggleKeyboard() {
+      keyboardEnabled = !keyboardEnabled;
+
+      if (keyboardEnabled) {
+        answerInput.removeAttribute("readonly");
+        answerInput.removeAttribute("inputmode");
+        answerInput.focus();
+        window.setTimeout(() => answerInput.focus(), 50);
+        kbToggle.innerText = "Disable Device Keyboard";
+      } else {
+        answerInput.setAttribute("readonly", "true");
+        answerInput.setAttribute("inputmode", "none");
+        answerInput.blur();
+        kbToggle.innerText = "Enable Device Keyboard";
+      }
+
+      kbToggle.classList.toggle("soft-active", keyboardEnabled);
+    }
+
+    function renderKeypad() {
+      const keys = [
+        "1", "2", "3", "Del",
+        "4", "5", "6", "C",
+        "7", "8", "9", "*",
+        ".", "0", "%", "/"
+      ];
+
+      keypad.innerHTML = "";
+
+      keys.forEach((key) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "key";
+        button.innerText = key;
+        button.onclick = () => {
+          if (key === "C") answerInput.value = "";
+          else if (key === "Del") answerInput.value = answerInput.value.slice(0, -1);
+          else answerInput.value += key;
+
+          answerInput.focus();
+        };
+        keypad.appendChild(button);
+      });
+    }
+
+    function buildPowerQuestion(kind, directionValue, explicitReversePrompt) {
+      const base = kind === "square" ? rand(11, 40) : rand(3, 20);
+      const power = kind === "square" ? 2 : 3;
+      const value = kind === "square" ? base * base : base * base * base;
+
+      if (directionValue === "forward") {
+        return {
+          answer: value,
+          prompt: `${base}^${power} = ?`
+        };
+      }
+
+      return {
+        answer: base,
+        prompt: explicitReversePrompt ? `?^${power} = ${value}` : `${value} = ?`
+      };
+    }
+
+    function buildRatioQuestion(directionValue) {
+      const leftBase = rand(2, 12);
+      let rightBase = rand(2, 12);
+
+      while (rightBase === leftBase) {
+        rightBase = rand(2, 12);
+      }
+
+      const multiplier = rand(2, 12);
+      const leftScaled = leftBase * multiplier;
+      const rightScaled = rightBase * multiplier;
+
+      if (directionValue === "forward") {
+        return {
+          answer: rightScaled,
+          prompt: `${leftBase}:${rightBase} = ${leftScaled}:?`
+        };
+      }
+
+      return {
+        answer: rightBase,
+        prompt: `${leftScaled}:${rightScaled} = ${leftBase}:?`
+      };
+    }
+
+    function getGameDisplay(modeValue, value) {
+      if (modeValue === "square") {
+        const root = Math.round(Math.sqrt(value));
+        return root * root === value ? String(root) : "";
+      }
+
+      if (modeValue === "cube") {
+        const root = Math.round(Math.cbrt(value));
+        return root * root * root === value ? String(root) : "";
+      }
+
+      if (modeValue === "consecutive") {
+        const base = getConsecutiveBase(value);
+        return base !== null ? `${base} x ${base + 1}` : "";
+      }
+
+      return "";
+    }
+
+    function handleGameToggle() {
+      if (gameMode.checked) patternMode.checked = false;
+      toggleGameMode();
+    }
+
+    function handlePatternToggle() {
+      if (patternMode.checked) gameMode.checked = false;
+      toggleGameMode();
+    }
+
+    function toggleGameMode() {
+      const game = gameMode.checked;
+      const allowedModes = ["square", "cube", "consecutive"];
+
+      for (const option of mode.options) {
+        option.disabled = game && !allowedModes.includes(option.value);
+      }
+
+      if (game && !allowedModes.includes(mode.value)) {
+        mode.value = "square";
+      }
+
+      direction.disabled = game;
+      updateModeNote();
+      updateAnswerPlaceholder();
+      generateQuestion();
+    }
+
+    function generateQuestion() {
+      evaluated = false;
+      clearResultMessage();
+      updateModeNote();
+      updateAnswerPlaceholder();
+
+      if (gameMode.checked) {
+        generateGame();
+        startTimer();
+        keypad.style.display = "none";
+        kbToggle.style.display = "none";
+        return;
+      }
+
+      gameArea.style.display = "none";
+      answerInput.style.display = "inline-block";
+      keypad.style.display = "grid";
+      kbToggle.style.display = "inline-block";
+      renderKeypad();
+
+      const modeValue = mode.value;
+      const dir = direction.value;
+
+      if (modeValue === "square") {
+        const question = buildPowerQuestion("square", dir, false);
+        answer = question.answer;
+        setQ(question.prompt);
+      } else if (modeValue === "cube") {
+        const question = buildPowerQuestion("cube", dir, false);
+        answer = question.answer;
+        setQ(question.prompt);
+      } else if (modeValue === "power_mix") {
+        const kind = Math.random() < 0.5 ? "square" : "cube";
+        const question = buildPowerQuestion(kind, dir, true);
+        answer = question.answer;
+        setQ(question.prompt);
+      } else if (modeValue === "consecutive") {
+        const base = rand(5, 30);
+        answer = dir === "forward" ? base * (base + 1) : base;
+        setQ(dir === "forward" ? `${base} x ${base + 1} = ?` : `${base * (base + 1)} = ?`);
+      } else if (modeValue === "table") {
+        const left = rand(11, 40);
+        const right = rand(2, 10);
+        if (dir === "forward") {
+          answer = left * right;
+          setQ(`${left} x ${right} = ?`);
+        } else {
+          answer = `${left}*${right}`;
+          setQ(`${left * right} = ?`);
+        }
+      } else if (modeValue === "factor") {
+        const left = rand(6, 30);
+        const right = rand(6, 30);
+        if (dir === "forward") {
+          answer = left * right;
+          setQ(`${left} x ${right} = ?`);
+        } else {
+          answer = `${left}*${right}`;
+          setQ(`${left * right} = ?`);
+        }
+      } else if (modeValue.startsWith("percent")) {
+        const numerator = modeValue === "percent_mix" ? rand(1, 10) : parseInt(modeValue.replace("percent", ""), 10);
+        const denominator = rand(numerator + 1, 30);
+        const percent = ((numerator / denominator) * 100).toFixed(2);
+
+        if (dir === "forward") {
+          answer = `${numerator}/${denominator}`;
+          setQ(`${percent}% = ?`);
+        } else {
+          answer = percent;
+          setQ(`${numerator}/${denominator} = ?%`);
+        }
+      } else if (modeValue === "ratio") {
+        const question = buildRatioQuestion(dir);
+        answer = question.answer;
+        setQ(question.prompt);
+      } else if (modeValue === "mixed") {
+        const total = rand(20, 100);
+        const percent = rand(10, 50);
+        answer = Math.round((percent / 100) * total);
+        setQ(`${percent}% of ${total} = ?`);
+      } else {
+        answer = "";
+        setQ("Choose a mode to start.");
+      }
+
+      answerInput.value = "";
+      startTimer();
+    }
+
+    function generateGame() {
+      gameArea.style.display = "grid";
+      answerInput.style.display = "none";
+      keypad.style.display = "none";
+      kbToggle.style.display = "none";
+
+      clearResultMessage();
+      gameArea.innerHTML = "";
+
+      const modeValue = mode.value;
+      let title = "";
+      const correctSet = new Set();
+
+      if (modeValue === "square") {
+        title = "Select perfect squares";
+      } else if (modeValue === "cube") {
+        title = "Select perfect cubes";
+      } else if (modeValue === "consecutive") {
+        title = "Select n x (n+1)";
+      }
+
+      setQ(title);
+
+      const required = rand(3, 5);
+
+      while (correctSet.size < required) {
+        let base;
+        if (modeValue === "square") {
+          base = rand(5, 20);
+          correctSet.add(base * base);
+        } else if (modeValue === "cube") {
+          base = rand(3, 10);
+          correctSet.add(base * base * base);
+        } else if (modeValue === "consecutive") {
+          base = rand(3, 15);
+          correctSet.add(base * (base + 1));
+        }
+      }
+
+      const numbers = [...correctSet];
+
+      while (numbers.length < 12) {
+        const randomValue = rand(10, 300);
+        if (!numbers.includes(randomValue)) {
+          numbers.push(randomValue);
+        }
+      }
+
+      shuffle(numbers).forEach((num) => {
+        const box = document.createElement("div");
+        box.className = "number-box";
+        box.innerText = num;
+        box.onclick = () => {
+          if (evaluated) return;
+          box.classList.toggle("selected");
+        };
+        gameArea.appendChild(box);
+      });
+
+      if (modeValue === "square") {
+        answer = new Set(numbers.filter((num) => isPerfectSquare(num)));
+      } else if (modeValue === "cube") {
+        answer = new Set(numbers.filter((num) => isPerfectCube(num)));
+      } else if (modeValue === "consecutive") {
+        answer = new Set(numbers.filter((num) => getConsecutiveBase(num) !== null));
+      }
+
+      evaluated = false;
+    }
+
+    function submitGame() {
+      if (evaluated) return;
+
+      const boxes = document.querySelectorAll(".number-box");
+      const userSet = new Set();
+
+      boxes.forEach((box) => {
+        if (box.classList.contains("selected")) {
+          userSet.add(parseInt(box.innerText, 10));
+        }
+      });
+
+      boxes.forEach((box) => {
+        const value = parseInt(box.innerText, 10);
+
+        if (answer.has(value) && userSet.has(value)) {
+          box.classList.add("correct");
+        } else if (!answer.has(value) && userSet.has(value)) {
+          box.classList.add("wrong");
+        } else if (answer.has(value) && !userSet.has(value)) {
+          box.classList.add("missed");
+        }
+
+        if (answer.has(value)) {
+          const display = getGameDisplay(mode.value, value);
+          if (display) {
+            box.innerHTML = `${value}<div class="small">${display}</div>`;
+          }
+        }
+      });
+
+      evaluated = true;
+
+      const isCorrect =
+        userSet.size === answer.size &&
+        [...answer].every((value) => userSet.has(value));
+
+      if (isCorrect) {
+        setResultMessage("Correct", "success");
+      } else {
+        setResultMessage("Try again", "danger");
+      }
+    }
+
+    function handleSubmit() {
+      if (gameMode.checked) submitGame();
+      else checkAnswer();
+    }
+
+    function checkAnswer() {
+      if (timedOut && evaluated) return;
+
+      stopTimer();
+
+      const user = answerInput.value.trim();
+      const correct = isAnswerCorrect(user, answer);
+
+      if (correct) {
+        setResultMessage("Correct", "success");
+      } else {
+        setResultMessage(`Correct: ${answer}`, "danger");
+      }
+
       evaluated = true;
     }
-  },1000);
-}
 
-function updateTimer(){
-  document.getElementById("timer").innerText = `⏱ ${timeLeft}s`;
-}
-
-// -------- HELPERS --------
-function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
-function isPerfectSquare(n){ return Number.isInteger(Math.sqrt(n)); }
-function isPerfectCube(n){ return Number.isInteger(Math.cbrt(n)); }
-function getConsecutiveBase(n){
-  for(let i=1;i<=Math.sqrt(n);i++){
-    if(i*(i+1)===n) return i;
-  }
-  return null;
-}
-
-// -------- KEYBOARD --------
-function toggleKeyboard(){
-  let input=document.getElementById("answer");
-  let btn=document.getElementById("kbToggle");
-
-  keyboardEnabled=!keyboardEnabled;
-
-  if(keyboardEnabled){
-    input.removeAttribute("readonly");
-    input.removeAttribute("inputmode");
-    input.focus();
-    setTimeout(()=>input.focus(),50);
-
-    btn.innerText="Disable Device Keyboard";
-    btn.style.background="#4CAF50";
-    btn.style.color="white";
-  } else {
-    input.setAttribute("readonly",true);
-    input.setAttribute("inputmode","none");
-    input.blur();
-
-    btn.innerText="Enable Device Keyboard";
-    btn.style.background="";
-    btn.style.color="";
-  }
-}
-
-// -------- KEYPAD --------
-function renderKeypad(){
-  let keys=[
-    "1","2","3",
-    "4","5","6",
-    "7","8","9",
-    ".","0","%",
-    "*","/","←",
-    "C"
-  ];
-  let kp=document.getElementById("keypad");
-  kp.innerHTML="";
-
-  keys.forEach(k=>{
-    let btn=document.createElement("div");
-    btn.className="key";
-    btn.innerText=k;
-
-    btn.onclick=()=>{
-      let input=document.getElementById("answer");
-      if(k==="C") input.value="";
-      else if(k==="←") input.value=input.value.slice(0,-1);
-      else input.value+=k;
-      input.focus();
-    };
-
-    kp.appendChild(btn);
-  });
-}
-
-// -------- MODE TOGGLE --------
-function handleGameToggle(){
-  if(gameMode.checked) patternMode.checked=false;
-  toggleGameMode();
-}
-function handlePatternToggle(){
-  if(patternMode.checked) gameMode.checked=false;
-  toggleGameMode();
-}
-
-function toggleGameMode(){
-  let game=gameMode.checked;
-  let allowed=["square","cube","consecutive"];
-
-  for(let opt of mode.options){
-    opt.disabled = game && !allowed.includes(opt.value);
-  }
-
-  if(game && !allowed.includes(mode.value)){
-    mode.value="square";
-  }
-
-  direction.disabled=game;
-  generateQuestion();
-}
-
-// -------- MAIN --------
-function generateQuestion(){
-  evaluated=false;
-  result.innerText="";
-
-  if(gameMode.checked){
-    generateGame();
-  
-    startTimer();   // ✅ ADD THIS
-  
-    keypad.style.display="none";
-    kbToggle.style.display="none";
-    return;
-  }
-
-  gameArea.style.display="none";
-  answerInput.style.display="inline-block";
-  keypad.style.display="grid";
-  kbToggle.style.display="inline-block";
-
-  renderKeypad();
-
-  let m=mode.value;
-  let dir=direction.value;
-
-  if(m==="square"){
-    let n=rand(11,40);
-    answer=(dir==="forward")?n*n:n;
-    setQ(dir==="forward"?`${n}²=?`:`${n*n}=?`);
-  }
-
-  else if(m==="cube"){
-    let n=rand(3,20);
-    answer=(dir==="forward")?n*n*n:n;
-    setQ(dir==="forward"?`${n}³=?`:`${n*n*n}=?`);
-  }
-
-  else if(m==="consecutive"){
-    let n=rand(5,30);
-    answer=(dir==="forward")?n*(n+1):n;
-    setQ(dir==="forward"?`${n}×${n+1}=?`:`${n*(n+1)}=?`);
-  }
-
-  else if(m==="table"){
-    let a=rand(11,40), b=rand(2,10);
-    if(dir==="forward"){ answer=a*b; setQ(`${a}×${b}=?`); }
-    else { answer=`${a}*${b}`; setQ(`${a*b}=?`); }
-  }
-
-  else if(m==="factor"){
-    let a=rand(6,30), b=rand(6,30);
-    if(dir==="forward"){ answer=a*b; setQ(`${a}×${b}=?`); }
-    else { answer=`${a}*${b}`; setQ(`${a*b}=?`); }
-  }
-
-  else if(m.startsWith("percent")){
-    let num=(m==="percent_mix")?rand(1,10):parseInt(m.replace("percent",""));
-    let den=rand(num+1,30);
-    let percent=((num/den)*100).toFixed(2);
-
-    if(dir==="forward"){ answer=`${num}/${den}`; setQ(`${percent}%=?`); }
-    else { answer=percent; setQ(`${num}/${den}=?%`); }
-  }
-
-  else if(m==="mixed"){
-    let a=rand(20,100), p=rand(10,50);
-    answer=Math.round((p/100)*a);
-    setQ(`${p}% of ${a}`);
-  }
-
-  answerInput.value="";
-  if(!gameMode.checked){
-    startTimer();
-  }
-}
-
-// -------- GAME MODE --------
-function generateGame(){
-  gameArea.style.display="block";
-  answerInput.style.display="none";
-  keypad.style.display="none";
-  kbToggle.style.display="none";
-
-  result.innerText="";
-  gameArea.innerHTML="";
-
-  let m = mode.value;
-  let numbers;
-  let correctSet = new Set();
-
-  let title="";
-
-  if(m==="square"){
-    title="Select PERFECT SQUARES";
-  }
-
-  else if(m==="cube"){
-    title="Select PERFECT CUBES";
-  }
-
-  else if(m==="consecutive"){
-    title="Select n × (n+1)";
-  }
-
-  setQ(title);
-
-  // ✅ ensure minimum correct answers
-  let required = rand(3,5);
-  
-  while(correctSet.size < required){
-    let n;
-  
-    if(m === "square"){
-      n = rand(5,20);
-      correctSet.add(n*n);
-    }
-    else if(m === "cube"){
-      n = rand(3,10);
-      correctSet.add(n*n*n);
-    }
-    else if(m === "consecutive"){
-      n = rand(3,15);
-      correctSet.add(n*(n+1));
-    }
-  }
-  
-  numbers = [...correctSet];
-  
-  // fill remaining random numbers
-  while(numbers.length < 12){
-    let r = rand(10,300);
-    if(!numbers.includes(r)){
-      numbers.push(r);
-    }
-  }
-
-  numbers.sort(()=>Math.random()-0.5);
-
-  numbers.forEach(num=>{
-    let div=document.createElement("div");
-    div.className="number-box";
-    div.innerText=num;
-
-    div.onclick=()=>{
-      if(evaluated) return;
-      div.classList.toggle("selected");
-    };
-
-    gameArea.appendChild(div);
-  });
-
-  if(m === "square"){
-    answer = new Set(numbers.filter(n => isPerfectSquare(n)));
-  }
-  else if(m === "cube"){
-    answer = new Set(numbers.filter(n => isPerfectCube(n)));
-  }
-  else if(m === "consecutive"){
-    answer = new Set(numbers.filter(n => getConsecutiveBase(n) !== null));
-  }
-  evaluated=false;
-}
-
-function submitGame(){
-  if(evaluated) return;
-
-  let boxes=document.querySelectorAll(".number-box");
-  let userSet=new Set();
-
-  boxes.forEach(box=>{
-    if(box.classList.contains("selected")){
-      userSet.add(parseInt(box.innerText));
-    }
-  });
-
-  boxes.forEach(box=>{
-    let val=parseInt(box.innerText);
-  
-    if(answer.has(val) && userSet.has(val)){
-    box.classList.add("correct");
-  
-    let display = "";
-  
-    if(mode.value === "square"){
-      let root = Math.sqrt(val);
-      if(Number.isInteger(root)){
-        display = root;
+    function nextQuestion() {
+      if (!evaluated) {
+        if (gameMode.checked) submitGame();
+        else checkAnswer();
+        return;
       }
+
+      stopTimer();
+      generateQuestion();
     }
-  
-    else if(mode.value === "cube"){
-      let root = Math.cbrt(val);
-      if(Number.isInteger(root)){
-        display = root;
+
+    const gameMode = document.getElementById("gameMode");
+    const patternMode = document.getElementById("patternMode");
+    const mode = document.getElementById("mode");
+    const direction = document.getElementById("direction");
+    const timerSelect = document.getElementById("timerSelect");
+    const questionEl = document.getElementById("question");
+    const timerEl = document.getElementById("timer");
+    const result = document.getElementById("result");
+    const gameArea = document.getElementById("gameArea");
+    const answerInput = document.getElementById("answer");
+    const keypad = document.getElementById("keypad");
+    const kbToggle = document.getElementById("kbToggle");
+    const modeNote = document.getElementById("modeNote");
+
+    answerInput.addEventListener("focus", () => {
+      if (!keyboardEnabled) {
+        answerInput.blur();
       }
-    }
-  
-    else if(mode.value === "consecutive"){
-      let base = getConsecutiveBase(val);
-      if(base){
-        display = `${base} × ${base+1}`;
+    });
+
+    answerInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        handleSubmit();
       }
-    }
-  
-    if(display){
-      box.innerHTML = `${val}<div class="small">${display}</div>`;
-    }
-  } else if(!answer.has(val) && userSet.has(val)){
-      // ❌ wrong selection
-      box.classList.add("wrong");
-  
-    } else if(answer.has(val) && !userSet.has(val)){
-        box.classList.add("missed");
-      
-        let display = "";
-      
-        if(mode.value === "square"){
-          let root = Math.sqrt(val);
-          if(Number.isInteger(root)){
-            display = root;
-          }
-        }
-      
-        else if(mode.value === "cube"){
-          let root = Math.cbrt(val);
-          if(Number.isInteger(root)){
-            display = root;
-          }
-        }
-      
-        else if(mode.value === "consecutive"){
-          let base = getConsecutiveBase(val);
-          if(base){
-            display = `${base} × ${base+1}`;
-          }
-        }
-      
-        if(display){
-          box.innerHTML = `${val}<div class="small">${display}</div>`;
-        }
+    });
+
+    mode.addEventListener("change", () => {
+      updateModeNote();
+      updateAnswerPlaceholder();
+      generateQuestion();
+    });
+
+    direction.addEventListener("change", () => {
+      updateModeNote();
+      updateAnswerPlaceholder();
+      generateQuestion();
+    });
+
+    timerSelect.addEventListener("change", () => {
+      updateModeNote();
+      updateTimer();
+
+      if (!evaluated) {
+        startTimer();
       }
-  });
+    });
 
-  evaluated=true;
-
-  const isCorrect =
-    userSet.size === answer.size &&
-    [...answer].every(v => userSet.has(v));
-  
-  if(isCorrect){
-    result.innerText = "✅ Correct";
-  } else {
-    result.innerText = "❌ Try again";
-  }
-}
-
-// -------- SUBMIT --------
-function handleSubmit(){
-  if(gameMode.checked) submitGame();
-  else checkAnswer();
-}
-
-function checkAnswer(){
-  if(timedOut && evaluated) return;   // ✅ FIX
-
-  clearInterval(timerInterval);
-
-  let user=answerInput.value.trim();
-
-  if(user==answer){
-    result.style.opacity = 0;
-    result.innerText="✅ Correct";
-    setTimeout(()=> result.style.opacity = 1, 50);
-  } else {
-    result.style.opacity = 0;
-    result.innerText=`❌ Correct: ${answer}`;
-    setTimeout(()=> result.style.opacity = 1, 50);
-  }
-
-  evaluated = true;
-}
-
-// -------- NEXT --------
-function nextQuestion(){
-  if(!evaluated){
-    if(gameMode.checked){
-      submitGame();
-    } else {
-      checkAnswer();
+    if (!gameMode.checked && !patternMode.checked) {
+      patternMode.checked = true;
     }
-    return;
-  }
 
-  clearInterval(timerInterval);
-  generateQuestion();
-}
+    toggleGameMode();
 
-// -------- UI --------
-let gameMode=document.getElementById("gameMode");
-let patternMode=document.getElementById("patternMode");
-let mode=document.getElementById("mode");
-let direction=document.getElementById("direction");
-let gameArea=document.getElementById("gameArea");
-let answerInput=document.getElementById("answer");
-let result=document.getElementById("result");
-let keypad=document.getElementById("keypad");
-let kbToggle=document.getElementById("kbToggle");
-
-answerInput.addEventListener("focus", () => {
-  if (!keyboardEnabled) {
-    answerInput.blur();   // 🚫 stops zoom + keyboard on iPhone
-  }
-});
-
-function setQ(t){ document.getElementById("question").innerText=t; }
-
-// SAFE INIT
-if(!gameMode.checked && !patternMode.checked){
-  patternMode.checked = true;
-}
-
-toggleGameMode();
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(() => console.log("Service Worker Registered"));
-  });
-}
-
-</script>
-
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js")
+          .then(() => console.log("Service Worker Registered"));
+      });
+    }
+  </script>
 </body>
 </html>
