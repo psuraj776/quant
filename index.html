@@ -446,23 +446,17 @@
     <section class="hero">
       <div class="eyebrow">Mental Math Drill Deck</div>
       <h1>Quant Practice Trainer</h1>
-      <p class="hero-copy">
-        Same content flow, cleaner visuals. Pattern mode keeps your single-answer timed drills, and game mode keeps
-        the tap-to-select rounds for squares, cubes, and consecutive products.
-      </p>
       <div class="toggle-row">
         <label class="toggle-card">
           <input type="checkbox" id="patternMode" onchange="handlePatternToggle()">
           <span>
             <strong>Pattern Mode</strong>
-            <small>Single-answer practice with the original 7-second timer.</small>
           </span>
         </label>
         <label class="toggle-card">
           <input type="checkbox" id="gameMode" onchange="handleGameToggle()">
           <span>
             <strong>Game Mode</strong>
-            <small>Tap every matching number before time runs out.</small>
           </span>
         </label>
       </div>
@@ -721,7 +715,7 @@
       const dir = direction.value;
 
       if (gameMode.checked) {
-        modeNote.innerText = "Game mode keeps the same tap-and-check flow and stays limited to square, cube, and consecutive rounds.";
+        modeNote.innerText = "Game mode keeps tap-and-check flow and stays limited to square, cube, and consecutive rounds.";
         return;
       }
 
@@ -746,9 +740,9 @@
       }
 
       const selectedSeconds = getSelectedTimerSeconds();
-      modeNote.innerText = selectedSeconds
-        ? `Pattern mode keeps the same mental-math flow with a ${selectedSeconds}-second timer.`
-        : "Pattern mode keeps the same mental-math flow with the timer turned off.";
+      //modeNote.innerText = selectedSeconds
+      //  ? `Pattern mode keeps the same mental-math flow with a ${selectedSeconds}-second timer.`
+      //  : "Pattern mode keeps the same mental-math flow with the timer turned off.";
     }
 
     function toggleKeyboard() {
