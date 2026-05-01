@@ -343,6 +343,11 @@
       color: white;
     }
 
+    .number-box.locked {
+      cursor: default;
+      transform: none;
+    }
+
     .number-box.wrong {
       background: var(--danger);
       border-color: var(--danger);
@@ -446,17 +451,23 @@
     <section class="hero">
       <div class="eyebrow">Mental Math Drill Deck</div>
       <h1>Quant Practice Trainer</h1>
+      <p class="hero-copy">
+        Same content flow, cleaner visuals. Pattern mode keeps your single-answer timed drills, and game mode keeps
+        the tap-to-select rounds for squares, cubes, consecutive products, and table-order practice.
+      </p>
       <div class="toggle-row">
         <label class="toggle-card">
           <input type="checkbox" id="patternMode" onchange="handlePatternToggle()">
           <span>
             <strong>Pattern Mode</strong>
+            <small>Single-answer practice with the original 7-second timer.</small>
           </span>
         </label>
         <label class="toggle-card">
           <input type="checkbox" id="gameMode" onchange="handleGameToggle()">
           <span>
             <strong>Game Mode</strong>
+            <small>Tap matches, or arrange table multiples in order.</small>
           </span>
         </label>
       </div>
@@ -532,7 +543,7 @@
       </div>
 
       <p class="meta-note" id="modeNote">
-        Game mode stays limited to square, cube, and consecutive drills. Pattern mode keeps the original answer flow.
+        Game mode includes square, cube, consecutive, and table-order drills. Pattern mode keeps the original answer flow.
       </p>
     </section>
   </main>
@@ -545,6 +556,7 @@
     let timerInterval = null;
     let timeLeft = 7;
     let timedOut = false;
+    let tableGameState = null;
 
     function rand(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -715,7 +727,11 @@
       const dir = direction.value;
 
       if (gameMode.checked) {
-        modeNote.innerText = "Game mode keeps tap-and-check flow and stays limited to square, cube, and consecutive rounds.";
+        if (modeValue === "table") {
+          modeNote.innerText = "Table game shows one table from 11 to 40. Tap the 20 shuffled multiples in exact order from 1x to 20x.";
+        } else {
+          modeNote.innerText = "Game mode keeps the same tap-and-check flow for square, cube, and consecutive rounds.";
+        }
         return;
       }
 
@@ -740,9 +756,9 @@
       }
 
       const selectedSeconds = getSelectedTimerSeconds();
-      //modeNote.innerText = selectedSeconds
-      //  ? `Pattern mode keeps the same mental-math flow with a ${selectedSeconds}-second timer.`
-      //  : "Pattern mode keeps the same mental-math flow with the timer turned off.";
+      modeNote.innerText = selectedSeconds
+        ? `Pattern mode keeps the same mental-math flow with a ${selectedSeconds}-second timer.`
+        : "Pattern mode keeps the same mental-math flow with the timer turned off.";
     }
 
     function toggleKeyboard() {
@@ -864,14 +880,14 @@
 
     function toggleGameMode() {
       const game = gameMode.checked;
-      const allowedModes = ["square", "cube", "consecutive"];
+      const allowedModes = ["square", "cube", "consecutive", "table"];
 
       for (const option of mode.options) {
         option.disabled = game && !allowedModes.includes(option.value);
       }
 
       if (game && !allowedModes.includes(mode.value)) {
-        mode.value = "square";
+        mode.value = "table";
       }
 
       direction.disabled = game;
@@ -978,10 +994,16 @@
 
       clearResultMessage();
       gameArea.innerHTML = "";
+      tableGameState = null;
 
       const modeValue = mode.value;
       let title = "";
       const correctSet = new Set();
+
+      if (modeValue === "table") {
+        generateTableOrderGame();
+        return;
+      }
 
       if (modeValue === "square") {
         title = "Select perfect squares";
@@ -1040,8 +1062,91 @@
       evaluated = false;
     }
 
+    function generateTableOrderGame() {
+      const table = rand(11, 40);
+      const sequence = Array.from({ length: 20 }, (_, index) => ({
+        step: index + 1,
+        value: table * (index + 1)
+      }));
+
+      tableGameState = {
+        table,
+        sequence,
+        nextIndex: 0,
+        mistakes: 0
+      };
+
+      answer = sequence.map((item) => item.value);
+      setQ(`${table} table: tap 1x to 20x in order`);
+
+      shuffle(sequence).forEach((item) => {
+        const box = document.createElement("div");
+        box.className = "number-box";
+        box.innerText = item.value;
+        box.dataset.value = item.value;
+        box.dataset.step = item.step;
+        box.onclick = () => handleTableOrderClick(box);
+        gameArea.appendChild(box);
+      });
+
+      evaluated = false;
+      setResultMessage(`Next: ${table} x 1 = ${table}`, "warning");
+    }
+
+    function handleTableOrderClick(box) {
+      if (evaluated || !tableGameState || box.classList.contains("locked")) return;
+
+      const expected = tableGameState.sequence[tableGameState.nextIndex];
+      const clickedValue = Number(box.dataset.value);
+
+      if (clickedValue !== expected.value) {
+        tableGameState.mistakes += 1;
+        box.classList.add("wrong");
+        setResultMessage(`Not yet. Find ${tableGameState.table} x ${expected.step} = ${expected.value}`, "danger");
+        window.setTimeout(() => box.classList.remove("wrong"), 420);
+        return;
+      }
+
+      box.classList.remove("selected", "wrong");
+      box.classList.add("correct", "locked");
+      box.innerHTML = `${expected.value}<div class="small">${expected.step}x</div>`;
+      tableGameState.nextIndex += 1;
+
+      if (tableGameState.nextIndex >= tableGameState.sequence.length) {
+        evaluated = true;
+        stopTimer();
+        const mistakeText = tableGameState.mistakes ? ` with ${tableGameState.mistakes} miss${tableGameState.mistakes === 1 ? "" : "es"}` : "";
+        setResultMessage(`Table complete${mistakeText}`, tableGameState.mistakes ? "warning" : "success");
+        return;
+      }
+
+      const next = tableGameState.sequence[tableGameState.nextIndex];
+      setResultMessage(`Next: ${tableGameState.table} x ${next.step} = ${next.value}`, "warning");
+    }
+
     function submitGame() {
       if (evaluated) return;
+
+      if (mode.value === "table" && tableGameState) {
+        const expected = tableGameState.sequence[tableGameState.nextIndex];
+
+        document.querySelectorAll(".number-box").forEach((box) => {
+          const step = Number(box.dataset.step);
+          if (step <= tableGameState.nextIndex) return;
+          box.classList.add("missed");
+          box.innerHTML = `${box.dataset.value}<div class="small">${step}x</div>`;
+        });
+
+        stopTimer();
+        evaluated = true;
+        setResultMessage(
+          expected
+            ? `Stopped at ${tableGameState.nextIndex}/20. Next was ${tableGameState.table} x ${expected.step} = ${expected.value}`
+            : "Table complete",
+          expected ? "warning" : "success"
+        );
+        return;
+      }
 
       const boxes = document.querySelectorAll(".number-box");
       const userSet = new Set();
